@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>AI Extended Quiz - Engaging</title>
+<style>
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg, #ffecd2, #fcb69f); color: #333; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #fff; background: #ff6f61; padding: 15px; border-radius: 8px; font-size: 1.8em; }
+    .quiz-container { max-width: 800px; margin: auto; background: #ffffffcc; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .question { font-size: 18px; margin-bottom: 10px; font-weight: bold; color: #333; }
+    .options { list-style: none; padding: 0; }
+    .options li { margin: 8px 0; font-size: 16px; }
+    input[type='radio'] { margin-right: 10px; }
+    button { background: #ff6f61; color: white; border: none; padding: 12px 18px; font-size: 16px; cursor: pointer; border-radius: 8px; width: 100%; margin-top: 15px; }
+    button:hover { background: #e85c50; }
+    .feedback { margin-top: 5px; font-size: 14px; font-weight: bold; }
+    .correct { color: green; }
+    .incorrect { color: red; }
+    .result { font-size: 22px; font-weight: bold; margin-top: 20px; text-align: center; color: #ff6f61; }
+    .progress-container { width: 100%; background: #ddd; border-radius: 8px; margin: 15px 0; }
+    .progress-bar { width: 0%; height: 20px; background: #4CAF50; border-radius: 8px; transition: width 0.4s ease; }
+    .answer-key { margin-top: 20px; font-size: 16px; color: #333; }
+    .answer-key h3 { color: #ff6f61; }
+    @media (max-width: 600px) {
+        body { padding: 10px; }
+        h1 { font-size: 1.4em; padding: 10px; }
+        .quiz-container { padding: 15px; }
+        .question { font-size: 16px; }
+        .options li { font-size: 14px; }
+        button { font-size: 14px; padding: 10px; }
+    }
+</style>
+</head>
+<body>
+<h1>AI and Learning English Quiz</h1>
+<div class='quiz-container'>
+    <div class='progress-container'><div class='progress-bar' id='progress-bar'></div></div>
+    <div id='quiz'></div>
+    <button onclick='submitQuiz()'>Submit Quiz</button>
+    <div class='result' id='result'></div>
+    <div class='answer-key' id='answer-key'></div>
+</div>
+<script>
+let quizData = [
+{question: 'You are preparing for a job interview. Which tasks can AI help you with?', options: ['Giving feedback on your tone', 'Understanding cultural nuances in jokes', 'Generating sample interview questions', 'Deciding if you should accept the job'], correct: ['Giving feedback on your tone', 'Generating sample interview questions']},
+{question: 'Which of these are limitations of AI in language learning?', options: ['It can’t provide emotional support', 'It can’t adapt tone', 'It can’t fully teach cultural context', 'It can’t correct grammar'], correct: ['It can’t provide emotional support', 'It can’t fully teach cultural context']},
+{question: 'Rank these tasks from easiest for AI to hardest:', options: ['Correcting grammar', 'Explaining idioms', 'Detecting sarcasm', 'Generating vocabulary lists'], correct: ['Generating vocabulary lists → Correcting grammar → Explaining idioms → Detecting sarcasm']},
+{question: 'AI can help you practice English conversation by:', options: ['Simulating dialogues', 'Giving real-time emotional feedback', 'Correcting grammar mistakes', 'Understanding your cultural background'], correct: ['Simulating dialogues', 'Correcting grammar mistakes']},
+{question: 'Which of these writing tasks can AI do well?', options: ['Write a formal email', 'Write a casual Instagram post', 'Write a culturally sensitive joke', 'Write a LinkedIn summary'], correct: ['Write a formal email', 'Write a casual Instagram post', 'Write a LinkedIn summary']},
+{question: 'True or False: AI can guarantee error-free grammar in every context.', options: ['True', 'False'], correct: ['False']},
+{question: 'Scenario: You ask AI to help you sound natural in every situation. Is this possible?', options: ['Yes, AI can make you sound natural everywhere', 'No, AI struggles with cultural nuance and context'], correct: ['No', 'AI struggles with cultural nuance and context']},
+{question: 'Which of these benefits of AI in language learning are most useful for beginners?', options: ['Instant feedback on grammar', 'Understanding sarcasm', 'Generating vocabulary lists', 'Teaching cultural humor'], correct: ['Instant feedback on grammar', 'Generating vocabulary lists']},
+].sort(() => Math.random() - 0.5);
+
+const quizContainer = document.getElementById('quiz');
+quizData.forEach((q, index) => {
+    const shuffledOptions = q.options.map(opt => opt).sort(() => Math.random() - 0.5);
+    const questionElem = document.createElement('div');
+    questionElem.classList.add('question-block');
+    questionElem.innerHTML = `<p class='question'>${index + 1}. ${q.question}</p>`;
+    const optionsList = document.createElement('ul');
+    optionsList.classList.add('options');
+    shuffledOptions.forEach(opt => {
+        const li = document.createElement('li');
+        li.innerHTML = `<input type='radio' name='question${index}' value='${opt}' onchange='handleAnswer(${index}, "${opt}")'> ${opt}`;
+        optionsList.appendChild(li);
+    });
+    const feedbackDiv = document.createElement('div');
+    feedbackDiv.id = `feedback${index}`;
+    feedbackDiv.classList.add('feedback');
+    questionElem.appendChild(optionsList);
+    questionElem.appendChild(feedbackDiv);
+    quizContainer.appendChild(questionElem);
+});
+
+let answeredCount = 0;
+function handleAnswer(qIndex, selectedValue) {
+    const feedbackDiv = document.getElementById(`feedback${qIndex}`);
+    if (quizData[qIndex].correct.includes(selectedValue)) {
+        feedbackDiv.textContent = 'Correct!';
+        feedbackDiv.className = 'feedback correct';
+    } else {
+        feedbackDiv.textContent = 'Incorrect!';
+        feedbackDiv.className = 'feedback incorrect';
+    }
+    updateProgress();
+}
+
+function updateProgress() {
+    answeredCount = document.querySelectorAll('input[type=radio]:checked').length;
+    const progress = (answeredCount / quizData.length) * 100;
+    document.getElementById('progress-bar').style.width = progress + '%';
+}
+
+function submitQuiz() {
+    let score = 0;
+    quizData.forEach((q, index) => {
+        const selected = document.querySelector(`input[name='question${index}']:checked`);
+        if (selected && q.correct.includes(selected.value)) {
+            score++;
+        }
+    });
+    let message = '';
+    if (score === quizData.length) {
+        message = 'Excellent! You nailed it!';
+    } else if (score >= quizData.length * 0.7) {
+        message = 'Great job! You have strong knowledge.';
+    } else {
+        message = 'Keep practicing! You can improve.';
+    }
+    document.getElementById('result').innerText = `You scored ${score} out of ${quizData.length}! ${message}`;
+
+    let answerHTML = '<h3>Correct Answers:</h3><ol>';
+    quizData.forEach((q) => {
+        answerHTML += `<li>${q.question} <br><strong>Correct Answer(s):</strong> ${q.correct.join(', ')}</li>`;
+    });
+    answerHTML += '</ol>';
+    document.getElementById('answer-key').innerHTML = answerHTML;
+}
+</script>
+</body>
+</html>
